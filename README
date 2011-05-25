@@ -1,0 +1,8 @@
+This is a sample bot for playing poker against Oorby's poker API. See http://www.oorby.com.
+
+You can run this bot on the command line:
+./sample-bot.pl <YourBotName> <YourDevKey>
+
+It will then connect to oorby, and join and play poker games until you stop it.
+
+The key method to change is decide_next_action. That method is called when it is this bot's turn to make a move. It must look at the actions available to it (fold, call, or raise) and return one of those actions. As it is right now, it just chooses an action randomly.
