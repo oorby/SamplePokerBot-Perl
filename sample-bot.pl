@@ -79,17 +79,27 @@ sub endpoint_get
 	$ua->timeout($ARG_HTTP_TIMEOUT);
 	$ua->env_proxy();
 
-    my $url = "http://${ARG_ENDPOINT_HOST}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
+  my $url = "http://${ARG_ENDPOINT_HOST}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
+
+  my $errorCount = 0;
+  while (1) {
     my $response = $ua->get($url);
 
     if ($response->is_success()) {
+      $errorCount = 0;
+      if ($response->code == 200) {
         my $results = decode_json $response->content();
         $lastEventId = $results->{eventId};
         return $results;
+      } else {
+        print "Got " . $response->status_line() . ", retrying request\n";
+      }
     } else {
-        die $response->status_line;
+      print "Got error: " . $response->status_line() . ", waiting 10 seconds before trying again (error count = $errorCount)\n";
+      $errorCount += 1;
+      sleep 10;
     }
-
+  }
 }
 
 sub endpoint_post
@@ -102,14 +112,24 @@ sub endpoint_post
     $ua->env_proxy;
 
     my $url = "http://${ARG_ENDPOINT_HOST}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
-    my $response = $ua->post($url, $form_data);
+    my $errorCount = 0;
+    while (1) {
+      my $response = $ua->post($url, $form_data);
 
-    if ($response->is_success()) {
-        my $results = decode_json $response->content();
-        $lastEventId = $results->{eventId};
-        return $results;
-    } else {
-        die $response->status_line;
+      if ($response->is_success()) {
+        $errorCount = 0;
+        if ($response->code == 200) {
+          my $results = decode_json $response->content();
+          $lastEventId = $results->{eventId};
+          return $results;
+        } else {
+          print "Got " . $response->status_line() . ", retrying request\n";
+        }
+      } else {
+        print "Got error: " . $response->status_line() . ", waiting 10 seconds before trying again (error count = $errorCount)\n";
+        $errorCount += 1;
+        sleep 10;
+      }
     }
 }
 
