@@ -20,6 +20,8 @@ if (scalar @ARGV < 2) {
         exit 1;
 }
 
+my $GAME_SERVER = "http://$ARG_ENDPOINT_HOST";
+
 my $bot_name = $ARGV[0];
 my $guid = $ARGV[1];
 
@@ -41,7 +43,18 @@ while (1) {
 		$results = get_next_events();
 	}
 
-  if ($results->{event}->{eventType} eq 'ActionRequired') {
+  my $event_type = $results->{event}->{eventType};
+  if ($event_type eq "GameComplete") {
+    $GAME_SERVER = "http://$ARG_ENDPOINT_HOST";
+  } else {
+    my $newGameServer = $results->{event}->{game}->{gameManagerHost};
+    if (defined $newGameServer && $newGameServer ne $GAME_SERVER) {
+      print("game server changed to $newGameServer from $GAME_SERVER\n");
+      $GAME_SERVER = $newGameServer;
+    }
+  }
+
+  if ($event_type eq 'ActionRequired') {
     $next_action = decide_next_action($results);
   } else {
     $next_action = undef;
@@ -79,7 +92,7 @@ sub endpoint_get
 	$ua->timeout($ARG_HTTP_TIMEOUT);
 	$ua->env_proxy();
 
-  my $url = "http://${ARG_ENDPOINT_HOST}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
+  my $url = "${GAME_SERVER}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
 
   my $errorCount = 0;
   while (1) {
@@ -111,7 +124,7 @@ sub endpoint_post
     $ua->timeout($ARG_HTTP_TIMEOUT);
     $ua->env_proxy;
 
-    my $url = "http://${ARG_ENDPOINT_HOST}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
+    my $url = "${GAME_SERVER}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
     my $errorCount = 0;
     while (1) {
       my $response = $ua->post($url, $form_data);
