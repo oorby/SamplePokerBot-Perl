@@ -8,7 +8,7 @@ use LWP::UserAgent;
 use JSON;
 
 my $ARG_HTTP_TIMEOUT = 180;
-my $ARG_ENDPOINT_HOST = 'www.oorby.com';
+my $ARG_ENDPOINT_HOST = 'mcp.oorby.com';
 
 die unless GetOptions(
         'host=s'    => \$ARG_ENDPOINT_HOST,
