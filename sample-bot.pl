@@ -9,6 +9,7 @@ use JSON;
 
 my $ARG_HTTP_TIMEOUT = 180;
 my $ARG_ENDPOINT_HOST = 'mcp.oorby.com';
+my $PLAY_ONE_GAME = 1;
 
 die unless GetOptions(
         'host=s'    => \$ARG_ENDPOINT_HOST,
@@ -46,6 +47,7 @@ while (1) {
   my $event_type = $results->{event}->{eventType};
   if ($event_type eq "GameComplete") {
     $GAME_SERVER = "http://$ARG_ENDPOINT_HOST";
+    exit 0 if $PLAY_ONE_GAME;
   } else {
     my $newGameServer = $results->{event}->{game}->{gameManagerHost};
     if (defined $newGameServer && $newGameServer ne $GAME_SERVER) {
