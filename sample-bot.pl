@@ -81,6 +81,9 @@ sub take_action
 		action => $action
 	});
 
+  if (!defined $results) {
+    return get_next_events();
+  }
 	print_results($results);
 
   return $results;
@@ -141,9 +144,15 @@ sub endpoint_post
           print "Got " . $response->status_line() . ", retrying request\n";
         }
       } else {
-        print "Got error: " . $response->status_line() . ", waiting 10 seconds before trying again (error count = $errorCount)\n";
-        $errorCount += 1;
-        sleep 10;
+        if ($response->code >= 500) {
+          print "Got error: " . $response->status_line() . ", waiting 10 seconds before trying again (error count = $errorCount)\n";
+          print "Content: " . $response->content() . "\n";
+          $errorCount += 1;
+          sleep 10;
+        } else {
+          print "Got error: " . $response->status_line() . ".\n";
+          return undef;
+        }
       }
     }
 }
