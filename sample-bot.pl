@@ -17,19 +17,19 @@ die unless GetOptions(
 );
 
 if (scalar @ARGV < 2) {
-        print "usage: $0 botName guid [--host host] [--timeout timeout]\n";
+        print "usage: $0 botName devkey [--host host] [--timeout timeout]\n";
         exit 1;
 }
 
 my $GAME_SERVER = "http://$ARG_ENDPOINT_HOST";
 
 my $bot_name = $ARGV[0];
-my $guid = $ARGV[1];
+my $devkey = $ARGV[1];
 
 my $lastEventId = 'NONE';
 my $last_results = undef;
 
-print "joining game...\n";
+print "joining game... it could take 30-60 seconds for the game to start\n";
 
 my $next_action = undef;
 
@@ -97,7 +97,7 @@ sub endpoint_get
 	$ua->timeout($ARG_HTTP_TIMEOUT);
 	$ua->env_proxy();
 
-  my $url = "${GAME_SERVER}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
+  my $url = "${GAME_SERVER}${endpoint}?devkey=${devkey}&eventId=${lastEventId}";
 
   my $errorCount = 0;
   while (1) {
@@ -129,7 +129,7 @@ sub endpoint_post
     $ua->timeout($ARG_HTTP_TIMEOUT);
     $ua->env_proxy;
 
-    my $url = "${GAME_SERVER}${endpoint}?devkey=${guid}&eventId=${lastEventId}";
+    my $url = "${GAME_SERVER}${endpoint}?devkey=${devkey}&eventId=${lastEventId}";
     my $errorCount = 0;
     while (1) {
       my $response = $ua->post($url, $form_data);
